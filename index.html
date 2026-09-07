@@ -17,6 +17,7 @@
     />
     <meta name="apple-mobile-web-app-title" content="PLU Pescheria" />
     <meta name="theme-color" content="#050B14" />
+    <script src="reset.js"></script>
     <link rel="apple-touch-icon" href="icon-192.png" />
     <link rel="icon" href="icon-192.png" />
     <link rel="manifest" href="manifest.json" />
@@ -6277,9 +6278,7 @@
         const tokens = raw.split(",");
         const parts = tokens.map((tok) => {
           const tokLower = tok.toLowerCase().trim();
-          const isMatch = exact
-            ? tokLower === t
-            : tokLower.includes(t);
+          const isMatch = exact ? tokLower === t : tokLower.includes(t);
           if (!isMatch) return escapeHtml(tok);
           if (exact) {
             return "<mark>" + escapeHtml(tok) + "</mark>";
