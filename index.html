@@ -346,15 +346,16 @@
         color: var(--foam);
       }
 
+      footer {
+        position: relative;
+      }
       .version-tag {
-        position: fixed;
-        left: 10px;
-        bottom: 8px;
+        position: absolute;
+        left: 16px;
+        bottom: 14px;
         font-size: 11px;
         color: var(--mist-dim);
         letter-spacing: 0.3px;
-        z-index: 5;
-        pointer-events: none;
       }
 
       /* Nascondi dropdown Ragione Sociale e label */
@@ -464,9 +465,8 @@
 
     <footer>
       Plu_Pescheria.xlsx · dati incorporati nell'app<br />Multinu Michael
+      <span class="version-tag">V.1.3</span>
     </footer>
-
-    <div class="version-tag">V.1.3.0</div>
 
     <script>
       if ("serviceWorker" in navigator) {
