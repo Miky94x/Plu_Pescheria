@@ -17,7 +17,6 @@
     />
     <meta name="apple-mobile-web-app-title" content="PLU Pescheria" />
     <meta name="theme-color" content="#050B14" />
-    <script src="reset.js"></script>
     <link rel="apple-touch-icon" href="icon-192.png" />
     <link rel="icon" href="icon-192.png" />
     <link rel="manifest" href="manifest.json" />
@@ -459,7 +458,25 @@
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
-          navigator.serviceWorker.register("./sw.js").catch(() => {});
+          navigator.serviceWorker
+            .register("./sw.js")
+            .then((reg) => {
+              // controlla subito se su GitHub Pages c'e' una versione piu' recente
+              reg.update();
+              // ricontrolla periodicamente se l'app resta aperta a lungo
+              setInterval(() => reg.update(), 60 * 60 * 1000);
+            })
+            .catch(() => {});
+
+          // quando il nuovo service worker prende il controllo, ricarica
+          // automaticamente la pagina una sola volta per mostrare subito
+          // la versione aggiornata (niente piu' cache da cancellare a mano)
+          let refreshing = false;
+          navigator.serviceWorker.addEventListener("controllerchange", () => {
+            if (refreshing) return;
+            refreshing = true;
+            window.location.reload();
+          });
         });
       }
     </script>
@@ -6278,7 +6295,9 @@
         const tokens = raw.split(",");
         const parts = tokens.map((tok) => {
           const tokLower = tok.toLowerCase().trim();
-          const isMatch = exact ? tokLower === t : tokLower.includes(t);
+          const isMatch = exact
+            ? tokLower === t
+            : tokLower.includes(t);
           if (!isMatch) return escapeHtml(tok);
           if (exact) {
             return "<mark>" + escapeHtml(tok) + "</mark>";
