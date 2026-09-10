@@ -339,6 +339,7 @@
         padding: 14px 16px 28px;
         font-size: 15px;
         color: var(--mist-dim);
+        font-weight: 700;
       }
 
       ::selection {
@@ -464,8 +465,8 @@
     <main id="results"></main>
 
     <footer>
-      Plu_Pescheria.xlsx · dati incorporati nell'app<br />Multinu Michael
-      <span class="version-tag">V.1.3.1</span>
+      <br />Multinu Michael
+      <span class="version-tag">V.1.3.2</span>
     </footer>
 
     <script>
@@ -6340,24 +6341,33 @@
         );
       }
 
+      function normalizeSearchText(value) {
+        return String(value ?? "")
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase()
+          .replace(/[’']/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+      }
+
       function matchesSearch(item, term, exact) {
         if (!term) return true;
-        const t = term.toLowerCase().trim();
-        const descrizione = fmt(item.descrizione).toLowerCase();
+        const t = normalizeSearchText(term);
+        const descrizione = normalizeSearchText(fmt(item.descrizione));
         const codici = splitCodici(item.codice_articolo).map((c) =>
-          c.toLowerCase(),
+          normalizeSearchText(c),
         );
 
         if (exact) {
-          // ricerca esatta (spazio finale): SOLO codice esatto, mai la
-          // descrizione, altrimenti termini come "1" o "2" trovano decine
-          // di articoli solo perche' hanno quella cifra in un peso/formato
-          // (es. "800/1000", "100/300") e il vero match sparisce nel rumore
           return codici.some((c) => c === t);
         }
 
-        // ricerca parziale: sottostringa su ciascun codice preso singolarmente
-        // (mai sull'intera stringa unita dalle virgole) + descrizione
+        const parole = t.split(/\s+/).filter(Boolean);
+        if (parole.length > 1) {
+          return parole.every((parola) => descrizione.includes(parola));
+        }
+
         return codici.some((c) => c.includes(t)) || descrizione.includes(t);
       }
 
@@ -6366,8 +6376,6 @@
         const rawTerm = searchBox.value;
         const term = rawTerm.trim();
         const isNumericSearch = /^\d+$/.test(term);
-        // Lo spazio finale mantiene la ricerca esatta solo per i codici numerici.
-        // Per le parole/frasi gli spazi non cambiano il tipo di ricerca.
         const exact = isNumericSearch && /\s$/.test(rawTerm);
 
         clearBtn.classList.toggle("show", term.length > 0);
