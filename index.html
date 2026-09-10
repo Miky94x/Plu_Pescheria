@@ -465,7 +465,7 @@
 
     <footer>
       Plu_Pescheria.xlsx · dati incorporati nell'app<br />Multinu Michael
-      <span class="version-tag">V.1.3</span>
+      <span class="version-tag">V.1.3.1</span>
     </footer>
 
     <script>
@@ -6308,9 +6308,7 @@
         const tokens = raw.split(",");
         const parts = tokens.map((tok) => {
           const tokLower = tok.toLowerCase().trim();
-          const isMatch = exact
-            ? tokLower === t
-            : tokLower.includes(t);
+          const isMatch = exact ? tokLower === t : tokLower.includes(t);
           if (!isMatch) return escapeHtml(tok);
           if (exact) {
             return "<mark>" + escapeHtml(tok) + "</mark>";
@@ -6367,7 +6365,10 @@
         const rs = rsFilter.value;
         const rawTerm = searchBox.value;
         const term = rawTerm.trim();
-        const exact = term.length > 0 && /\s$/.test(rawTerm); // spazio finale = ricerca esatta
+        const isNumericSearch = /^\d+$/.test(term);
+        // Lo spazio finale mantiene la ricerca esatta solo per i codici numerici.
+        // Per le parole/frasi gli spazi non cambiano il tipo di ricerca.
+        const exact = isNumericSearch && /\s$/.test(rawTerm);
 
         clearBtn.classList.toggle("show", term.length > 0);
         resetLink.classList.toggle("show", term.length > 0 || rs.length > 0);
