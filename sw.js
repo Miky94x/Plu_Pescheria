@@ -1,7 +1,8 @@
-const CACHE_NAME = 'plu-pescheria-v2';
+const CACHE_NAME = 'plu-pescheria-v3';
 const ASSETS = [
   './',
   './index.html',
+  './firebase-config.js',
   './manifest.json',
   './icon-192.png',
   './icon-512.png'
@@ -11,8 +12,6 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
   );
-  // attiva subito il nuovo service worker senza aspettare la chiusura
-  // di tutte le schede/istanze dell'app ancora aperte
   self.skipWaiting();
 });
 
@@ -29,13 +28,18 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const req = event.request;
 
-  // richieste di navigazione (apertura/refresh della pagina HTML):
-  // network-first, cosi' si vede sempre l'ultima versione pubblicata
-  // su GitHub Pages quando c'e' connessione; la cache serve solo da
-  // fallback quando si e' offline.
+  // Solo GET. Le chiamate a Firebase (Auth/Firestore, POST o altri domini)
+  // passano direttamente in rete senza toccare la cache.
+  if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+  const isSameOrigin = url.origin === self.location.origin;
+  const isFirebaseSdk = url.hostname === 'www.gstatic.com';
+  if (!isSameOrigin && !isFirebaseSdk) return;
+
+  // pagina HTML: network-first (ultima versione online, cache come fallback offline)
   const isNavigation =
     req.mode === 'navigate' ||
-    (req.method === 'GET' && req.headers.get('accept')?.includes('text/html'));
+    (req.headers.get('accept') || '').includes('text/html');
 
   if (isNavigation) {
     event.respondWith(
@@ -52,18 +56,18 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // asset statici (icone, manifest, ecc.): cache-first, cambiano raramente
+  // asset statici e SDK Firebase: cache-first
   event.respondWith(
     caches.match(req).then((cached) => {
       return (
         cached ||
-        fetch(req)
-          .then((response) => {
+        fetch(req).then((response) => {
+          if (response.ok) {
             const copy = response.clone();
             caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
-            return response;
-          })
-          .catch(() => cached)
+          }
+          return response;
+        })
       );
     })
   );
