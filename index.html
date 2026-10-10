@@ -573,6 +573,129 @@
           align-items: center;
         }
       }
+
+      /* --- banner aggiornamento --- */
+      .update-banner {
+        position: fixed;
+        left: 12px;
+        right: 12px;
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+        z-index: 95;
+        max-width: 560px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: var(--cyan);
+        color: var(--abyss);
+        border-radius: 14px;
+        padding: 13px 16px;
+        font-size: 14px;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5);
+      }
+      .update-banner[hidden] {
+        display: none;
+      }
+      .update-banner .x {
+        margin-left: auto;
+        background: none;
+        border: none;
+        color: inherit;
+        font-size: 18px;
+        line-height: 1;
+        padding: 2px 4px;
+        cursor: pointer;
+      }
+
+      /* --- scheda dettaglio prodotto --- */
+      .detail-on .card {
+        cursor: pointer;
+      }
+      .detail-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 90;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: rgba(5, 11, 20, 0.82);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        cursor: pointer;
+        animation: detailFade 0.15s ease;
+      }
+      .detail-overlay[hidden] {
+        display: none;
+      }
+      @keyframes detailFade {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      .detail-card {
+        width: 100%;
+        max-width: 520px;
+        max-height: 90vh;
+        overflow: auto;
+        background: linear-gradient(155deg, var(--surface) 0%, var(--panel) 100%);
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        padding: 26px 22px 18px;
+        box-shadow: 0 14px 50px rgba(0, 0, 0, 0.55);
+      }
+      .d-desc {
+        margin: 0 0 8px;
+        font-size: 24px;
+        font-weight: 800;
+        line-height: 1.25;
+        color: var(--foam);
+      }
+      .d-rs {
+        margin: 0 0 22px;
+        font-size: 14px;
+        color: var(--mist);
+      }
+      .d-label {
+        margin: 0 0 6px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--cyan-dim);
+      }
+      .d-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 20px;
+      }
+      .d-cod {
+        background: rgba(47, 230, 208, 0.1);
+        border: 1px solid rgba(47, 230, 208, 0.25);
+        color: var(--cyan);
+        border-radius: 12px;
+        padding: 8px 16px;
+        font-size: 30px;
+        font-weight: 800;
+        font-variant-numeric: tabular-nums;
+      }
+      .d-plu {
+        margin-bottom: 18px;
+        font-size: 56px;
+        font-weight: 800;
+        line-height: 1.1;
+        letter-spacing: 1px;
+        font-variant-numeric: tabular-nums;
+        color: var(--azure);
+      }
+      .d-hint {
+        margin: 0;
+        text-align: center;
+        font-size: 12px;
+        color: var(--mist-dim);
+      }
     </style>
   </head>
   <body class="auth-loading">
@@ -650,6 +773,23 @@
       <span class="version-tag">V.2.0.0</span>
     </footer>
 
+    <div class="update-banner" id="updateBanner" hidden>
+      <span>🔄 Aggiornamento disponibile · tocca per ricaricare</span>
+      <button class="x" id="updateClose" aria-label="Chiudi">✕</button>
+    </div>
+
+    <div class="detail-overlay" id="detailModal" hidden>
+      <div class="detail-card">
+        <p class="d-desc" id="dDesc"></p>
+        <p class="d-rs" id="dRs"></p>
+        <p class="d-label">Codice articolo</p>
+        <div class="d-chips" id="dCod"></div>
+        <p class="d-label">PLU</p>
+        <div class="d-plu" id="dPlu"></div>
+        <p class="d-hint">Tocca per chiudere</p>
+      </div>
+    </div>
+
     <div class="install-overlay" id="installModal" hidden>
       <div class="install-card" role="dialog" aria-modal="true" aria-labelledby="installTitle">
         <img src="icon-192.png" alt="" />
@@ -670,29 +810,63 @@
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
+          const banner = document.getElementById("updateBanner");
+          let waitingWorker = null;
+          let userRequested = false;
+
+          function showBanner(worker) {
+            waitingWorker = worker;
+            banner.hidden = false;
+          }
+
           navigator.serviceWorker
             .register("./sw.js")
             .then((reg) => {
-              // controlla subito se su GitHub Pages c'e' una versione piu' recente
+              // nuova versione gia' scaricata e in attesa
+              if (reg.waiting && navigator.serviceWorker.controller) {
+                showBanner(reg.waiting);
+              }
+              // nuova versione trovata mentre l'app e' aperta
+              reg.addEventListener("updatefound", () => {
+                const nw = reg.installing;
+                if (!nw) return;
+                nw.addEventListener("statechange", () => {
+                  if (nw.state === "installed" && navigator.serviceWorker.controller) {
+                    showBanner(nw);
+                  }
+                });
+              });
               reg.update();
-              // ricontrolla periodicamente se l'app resta aperta a lungo
               setInterval(() => reg.update(), 60 * 60 * 1000);
+              document.addEventListener("visibilitychange", () => {
+                if (document.visibilityState === "visible") reg.update();
+              });
             })
             .catch(() => {});
 
-          // quando il nuovo service worker prende il controllo, ricarica
-          // automaticamente la pagina una sola volta per mostrare subito
-          // la versione aggiornata (niente piu' cache da cancellare a mano)
-          let refreshing = false;
+          // il ricaricamento avviene SOLO se l'utente tocca il banner
+          banner.addEventListener("click", () => {
+            userRequested = true;
+            if (waitingWorker) waitingWorker.postMessage({ type: "SKIP_WAITING" });
+            else window.location.reload();
+          });
+          document.getElementById("updateClose").addEventListener("click", (e) => {
+            e.stopPropagation();
+            banner.hidden = true;
+          });
           navigator.serviceWorker.addEventListener("controllerchange", () => {
-            if (refreshing) return;
-            refreshing = true;
-            window.location.reload();
+            if (userRequested) window.location.reload();
           });
         });
       }
     </script>
     <script>
+      // true = toccando un prodotto si apre la scheda ingrandita (si chiude toccandola di nuovo)
+      // false = toccare un prodotto non fa nulla
+      const SCHEDA_DETTAGLIO = true;
+      if (SCHEDA_DETTAGLIO) document.body.classList.add("detail-on");
+
+      let lastRendered = []; // articoli attualmente mostrati (per la scheda)
       let DATA = []; // caricato da Firestore dopo il login
 
       const rsFilter = document.getElementById("rsFilter");
@@ -898,11 +1072,12 @@
         // limite di rendering per fluidita' su liste molto lunghe senza filtro
         const MAX_RENDER = 50;
         const toRender = filtered.slice(0, MAX_RENDER);
+        lastRendered = toRender;
 
         let html = toRender
           .map(
-            (item) => `
-    <div class="card">
+            (item, i) => `
+    <div class="card" data-i="${i}">
       <p class="desc">${escapeHtml(fmt(item.descrizione))}</p>
       <p class="rs">${escapeHtml(fmt(item.ragione_sociale))}${item.fornitore ? " · Fornitore " + escapeHtml(fmt(item.fornitore)) : ""}</p>
       <div class="chips">
@@ -920,6 +1095,38 @@
 
         resultsEl.innerHTML = html;
       }
+
+      // ---- scheda dettaglio ----
+      const detailModal = document.getElementById("detailModal");
+
+      function openDetail(item) {
+        document.getElementById("dDesc").textContent = fmt(item.descrizione);
+        document.getElementById("dRs").textContent =
+          fmt(item.ragione_sociale) +
+          (item.fornitore ? " · Fornitore " + fmt(item.fornitore) : "");
+        const codici = splitCodici(item.codice_articolo);
+        document.getElementById("dCod").innerHTML = codici.length
+          ? codici.map((c) => '<span class="d-cod">' + escapeHtml(c) + "</span>").join("")
+          : '<span class="d-cod">—</span>';
+        document.getElementById("dPlu").textContent = formatPlu(item.plu) || "—";
+        detailModal.hidden = false;
+        document.body.style.overflow = "hidden";
+      }
+      function closeDetail() {
+        detailModal.hidden = true;
+        document.body.style.overflow = "";
+      }
+      resultsEl.addEventListener("click", (e) => {
+        if (!SCHEDA_DETTAGLIO) return;
+        const card = e.target.closest(".card");
+        if (!card) return;
+        const item = lastRendered[Number(card.dataset.i)];
+        if (item) openDetail(item);
+      });
+      detailModal.addEventListener("click", closeDetail);
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeDetail();
+      });
 
       rsFilter.addEventListener("change", render);
       searchBox.addEventListener("input", render);

@@ -1,6 +1,4 @@
-// la versione arriva da index.html (sw.js?v=...): un solo posto da aggiornare
-const APP_VERSION = new URL(self.location.href).searchParams.get('v') || '0';
-const CACHE_NAME = 'plu-pescheria-v' + APP_VERSION;
+const CACHE_NAME = 'plu-pescheria-v4';
 const ASSETS = [
   './',
   './index.html',
@@ -14,7 +12,12 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
   );
-  self.skipWaiting();
+  // niente skipWaiting automatico: la nuova versione resta "in attesa"
+  // finche' l'utente non tocca il banner di aggiornamento (vedi messaggio sotto)
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
