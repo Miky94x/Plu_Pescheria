@@ -212,6 +212,16 @@
         display: flex;
       }
 
+      .search-hint {
+        margin: 6px 2px 0;
+        font-size: 12px;
+        color: var(--mist-dim);
+        line-height: 1.4;
+      }
+      .search-hint b {
+        color: var(--mist);
+      }
+
       .meta-row {
         display: flex;
         align-items: center;
@@ -349,6 +359,105 @@
         font-size: 15px;
         color: var(--mist-dim);
         font-weight: 700;
+      }
+
+      /* --- banner aggiornamento --- */
+      #updateBanner {
+        position: fixed;
+        left: 12px;
+        right: 12px;
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+        z-index: 50;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        max-width: 520px;
+        margin: 0 auto;
+        padding: 14px 16px;
+        border-radius: 14px;
+        background: var(--cyan);
+        color: var(--abyss);
+        font-size: 15px;
+        font-weight: 800;
+        text-align: center;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+        cursor: pointer;
+      }
+      #updateBanner.show {
+        display: flex;
+      }
+
+      /* --- scheda prodotto --- */
+      .scheda-on .card {
+        cursor: pointer;
+      }
+      #schedaOverlay {
+        position: fixed;
+        inset: 0;
+        z-index: 40;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: rgba(5, 11, 20, 0.82);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        cursor: pointer;
+      }
+      #schedaOverlay.show {
+        display: flex;
+      }
+      .scheda {
+        width: 100%;
+        max-width: 560px;
+        max-height: 90vh;
+        overflow-y: auto;
+        background: linear-gradient(155deg, var(--surface) 0%, var(--panel) 100%);
+        border: 1px solid rgba(47, 230, 208, 0.3);
+        border-radius: 20px;
+        padding: 26px 22px 22px;
+        box-shadow: 0 0 40px rgba(47, 230, 208, 0.12);
+      }
+      .scheda .s-desc {
+        margin: 0 0 8px;
+        font-size: 26px;
+        font-weight: 800;
+        line-height: 1.25;
+        color: var(--foam);
+      }
+      .scheda .s-rs {
+        margin: 0 0 22px;
+        font-size: 15px;
+        color: var(--mist);
+      }
+      .scheda .s-label {
+        margin: 0 0 6px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--cyan-dim);
+      }
+      .scheda .s-val {
+        margin: 0 0 20px;
+        font-size: 40px;
+        font-weight: 800;
+        line-height: 1.1;
+        font-variant-numeric: tabular-nums;
+        word-break: break-word;
+      }
+      .scheda .s-cod {
+        color: var(--cyan);
+      }
+      .scheda .s-plu {
+        color: var(--azure);
+        font-size: 56px;
+      }
+      .scheda .s-hint {
+        margin: 4px 0 0;
+        text-align: center;
+        font-size: 12px;
+        color: var(--mist-dim);
       }
 
       ::selection {
@@ -494,217 +603,6 @@
         cursor: pointer;
         padding: 6px;
       }
-
-      /* --- modale installazione --- */
-      .install-overlay {
-        position: fixed;
-        inset: 0;
-        z-index: 100;
-        display: flex;
-        align-items: flex-end;
-        justify-content: center;
-        padding: 16px calc(env(safe-area-inset-right, 0px) + 16px)
-          calc(env(safe-area-inset-bottom, 0px) + 16px)
-          calc(env(safe-area-inset-left, 0px) + 16px);
-        background: rgba(5, 11, 20, 0.72);
-        backdrop-filter: blur(4px);
-        -webkit-backdrop-filter: blur(4px);
-      }
-      .install-overlay[hidden] {
-        display: none;
-      }
-      .install-card {
-        width: 100%;
-        max-width: 380px;
-        background: linear-gradient(155deg, var(--surface) 0%, var(--panel) 100%);
-        border: 1px solid var(--line);
-        border-radius: 18px;
-        padding: 22px 20px 16px;
-        text-align: center;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-      }
-      .install-card img {
-        width: 56px;
-        height: 56px;
-        border-radius: 14px;
-        margin-bottom: 10px;
-      }
-      .install-card h2 {
-        margin: 0 0 8px;
-        font-size: 18px;
-        font-weight: 800;
-      }
-      .install-card p {
-        margin: 0 0 14px;
-        font-size: 14px;
-        line-height: 1.5;
-        color: var(--mist);
-      }
-      .install-card ol {
-        text-align: left;
-        margin: 0 0 14px;
-        padding-left: 22px;
-        font-size: 14px;
-        line-height: 1.6;
-        color: var(--foam);
-      }
-      .install-card button {
-        width: 100%;
-        border: none;
-        border-radius: 12px;
-        padding: 13px;
-        font-size: 16px;
-        font-weight: 800;
-        cursor: pointer;
-        background: var(--cyan);
-        color: var(--abyss);
-      }
-      .install-card button[hidden] {
-        display: none;
-      }
-      .install-card button.secondary {
-        background: none;
-        color: var(--mist);
-        font-weight: 600;
-        margin-top: 6px;
-      }
-      @media (min-width: 600px) {
-        .install-overlay {
-          align-items: center;
-        }
-      }
-
-      /* --- banner aggiornamento --- */
-      .update-banner {
-        position: fixed;
-        left: 12px;
-        right: 12px;
-        bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
-        z-index: 95;
-        max-width: 560px;
-        margin: 0 auto;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        background: var(--cyan);
-        color: var(--abyss);
-        border-radius: 14px;
-        padding: 13px 16px;
-        font-size: 14px;
-        font-weight: 800;
-        cursor: pointer;
-        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5);
-      }
-      .update-banner[hidden] {
-        display: none;
-      }
-      .update-banner .x {
-        margin-left: auto;
-        background: none;
-        border: none;
-        color: inherit;
-        font-size: 18px;
-        line-height: 1;
-        padding: 2px 4px;
-        cursor: pointer;
-      }
-
-      /* --- scheda dettaglio prodotto --- */
-      .detail-on .card {
-        cursor: pointer;
-      }
-      .detail-overlay {
-        position: fixed;
-        inset: 0;
-        z-index: 90;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-        background: rgba(5, 11, 20, 0.82);
-        backdrop-filter: blur(5px);
-        -webkit-backdrop-filter: blur(5px);
-        cursor: pointer;
-        animation: detailFade 0.15s ease;
-      }
-      .detail-overlay[hidden] {
-        display: none;
-      }
-      @keyframes detailFade {
-        from { opacity: 0; }
-        to { opacity: 1; }
-      }
-      .detail-card {
-        width: 100%;
-        max-width: 520px;
-        max-height: 90vh;
-        overflow: auto;
-        background: linear-gradient(155deg, var(--surface) 0%, var(--panel) 100%);
-        border: 1px solid var(--line);
-        border-radius: 20px;
-        padding: 26px 22px 18px;
-        box-shadow: 0 14px 50px rgba(0, 0, 0, 0.55);
-      }
-      .d-desc {
-        margin: 0 0 8px;
-        font-size: 24px;
-        font-weight: 800;
-        line-height: 1.25;
-        color: var(--foam);
-      }
-      .d-rs {
-        margin: 0 0 22px;
-        font-size: 14px;
-        color: var(--mist);
-      }
-      .d-label {
-        margin: 0 0 6px;
-        font-size: 11px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
-        color: var(--cyan-dim);
-      }
-      .d-chips {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-bottom: 20px;
-      }
-      .d-cod {
-        background: rgba(47, 230, 208, 0.1);
-        border: 1px solid rgba(47, 230, 208, 0.25);
-        color: var(--cyan);
-        border-radius: 12px;
-        padding: 8px 16px;
-        font-size: 30px;
-        font-weight: 800;
-        font-variant-numeric: tabular-nums;
-      }
-      .d-plu {
-        margin-bottom: 18px;
-        font-size: 56px;
-        font-weight: 800;
-        line-height: 1.1;
-        letter-spacing: 1px;
-        font-variant-numeric: tabular-nums;
-        color: var(--azure);
-      }
-      .d-hint {
-        margin: 0;
-        text-align: center;
-        font-size: 12px;
-        color: var(--mist-dim);
-      }
-
-      .search-hint {
-        margin: 7px 2px 0;
-        font-size: 12.5px;
-        color: var(--mist);
-      }
-      .search-hint[hidden] {
-        display: none;
-      }
     </style>
   </head>
   <body class="auth-loading">
@@ -767,7 +665,9 @@
             ✕
           </button>
         </div>
-        <p class="search-hint" id="searchHint" hidden></p>
+        <p class="search-hint">
+          Codice esatto: scrivi il numero e premi <b>spazio</b> (es. «103␣»)
+        </p>
       </div>
     </div>
 
@@ -778,106 +678,55 @@
 
     <main id="results"></main>
 
+    <div id="updateBanner" role="button">
+      🔄 Aggiornamento disponibile, tocca per ricaricare
+    </div>
+    <div id="schedaOverlay"><div class="scheda" id="schedaBox"></div></div>
+
     <footer>
       <br />Multinu Michael<br />Mercatò Asti Via Bra 2
-      <span class="version-tag">V.2.0.0</span>
+      <span class="version-tag" id="versionTag"></span>
     </footer>
 
-    <div class="update-banner" id="updateBanner" hidden>
-      <span>🔄 Aggiornamento disponibile · tocca per ricaricare</span>
-      <button class="x" id="updateClose" aria-label="Chiudi">✕</button>
-    </div>
-
-    <div class="detail-overlay" id="detailModal" hidden>
-      <div class="detail-card">
-        <p class="d-desc" id="dDesc"></p>
-        <p class="d-rs" id="dRs"></p>
-        <p class="d-label">Codice articolo</p>
-        <div class="d-chips" id="dCod"></div>
-        <p class="d-label">PLU</p>
-        <div class="d-plu" id="dPlu"></div>
-        <p class="d-hint">Tocca per chiudere</p>
-      </div>
-    </div>
-
-    <div class="install-overlay" id="installModal" hidden>
-      <div class="install-card" role="dialog" aria-modal="true" aria-labelledby="installTitle">
-        <img src="icon-192.png" alt="" />
-        <h2 id="installTitle">Installa PLU Pescheria</h2>
-        <p id="installText">
-          Aggiungi l'app alla schermata Home per aprirla subito, a schermo intero e anche senza connessione.
-        </p>
-        <ol id="iosSteps" hidden>
-          <li>Tocca il pulsante <b>Condividi</b> (il quadrato con la freccia in su) nella barra di Safari.</li>
-          <li>Scorri e scegli <b>Aggiungi alla schermata Home</b>.</li>
-          <li>Conferma con <b>Aggiungi</b>.</li>
-        </ol>
-        <button type="button" id="installBtn">Installa</button>
-        <button type="button" id="installLater" class="secondary">Non ora</button>
-      </div>
-    </div>
-
     <script>
+      // UNICO punto dove cambiare versione: aggiorna anche la cache del service worker
+      const APP_VERSION = "2.2.0";
+      document.getElementById("versionTag").textContent = "V." + APP_VERSION;
+
       if ("serviceWorker" in navigator) {
+        // c'era gia' un service worker attivo? (se no, e' la prima installazione)
+        const hadController = !!navigator.serviceWorker.controller;
         window.addEventListener("load", () => {
-          const banner = document.getElementById("updateBanner");
-          let waitingWorker = null;
-          let userRequested = false;
-
-          function showBanner(worker) {
-            waitingWorker = worker;
-            banner.hidden = false;
-          }
-
           navigator.serviceWorker
-            .register("./sw.js")
+            .register("./sw.js?v=" + APP_VERSION)
             .then((reg) => {
-              // nuova versione gia' scaricata e in attesa
-              if (reg.waiting && navigator.serviceWorker.controller) {
-                showBanner(reg.waiting);
-              }
-              // nuova versione trovata mentre l'app e' aperta
-              reg.addEventListener("updatefound", () => {
-                const nw = reg.installing;
-                if (!nw) return;
-                nw.addEventListener("statechange", () => {
-                  if (nw.state === "installed" && navigator.serviceWorker.controller) {
-                    showBanner(nw);
-                  }
-                });
-              });
+              // controlla subito se su GitHub Pages c'e' una versione piu' recente
               reg.update();
+              // ricontrolla periodicamente se l'app resta aperta a lungo
               setInterval(() => reg.update(), 60 * 60 * 1000);
-              document.addEventListener("visibilitychange", () => {
-                if (document.visibilityState === "visible") reg.update();
-              });
             })
             .catch(() => {});
 
-          // il ricaricamento avviene SOLO se l'utente tocca il banner
-          banner.addEventListener("click", () => {
-            userRequested = true;
-            if (waitingWorker) waitingWorker.postMessage({ type: "SKIP_WAITING" });
-            else window.location.reload();
-          });
-          document.getElementById("updateClose").addEventListener("click", (e) => {
-            e.stopPropagation();
-            banner.hidden = true;
-          });
+          // quando un nuovo service worker prende il controllo mostra il banner:
+          // il ricaricamento lo decide l'utente, non scatta mai mentre sta cercando
           navigator.serviceWorker.addEventListener("controllerchange", () => {
-            if (userRequested) window.location.reload();
+            // niente banner alla prima installazione
+            if (!hadController) return;
+            document.getElementById("updateBanner").classList.add("show");
           });
+          document
+            .getElementById("updateBanner")
+            .addEventListener("click", () => window.location.reload());
         });
       }
     </script>
     <script>
-      // true = toccando un prodotto si apre la scheda ingrandita (si chiude toccandola di nuovo)
-      // false = toccare un prodotto non fa nulla
-      const SCHEDA_DETTAGLIO = true;
-      if (SCHEDA_DETTAGLIO) document.body.classList.add("detail-on");
+      // true = toccando un prodotto si apre la scheda ingrandita; false = il tocco non fa nulla
+      const SCHEDA_PRODOTTO = true;
+      document.body.classList.toggle("scheda-on", SCHEDA_PRODOTTO);
 
-      let lastRendered = []; // articoli attualmente mostrati (per la scheda)
       let DATA = []; // caricato da Firestore dopo il login
+      let lastRendered = []; // articoli attualmente mostrati (per la scheda)
 
       const rsFilter = document.getElementById("rsFilter");
       const searchBox = document.getElementById("searchBox");
@@ -1049,16 +898,6 @@
         const isNumericSearch = /^\d+$/.test(term);
         const exact = isNumericSearch && /\s$/.test(rawTerm);
 
-        const hintEl = document.getElementById("searchHint");
-        if (isNumericSearch) {
-          hintEl.hidden = false;
-          hintEl.textContent = exact
-            ? "✔ Ricerca esatta del codice"
-            : "💡 Aggiungi uno spazio dopo il numero per cercare solo il codice esatto";
-        } else {
-          hintEl.hidden = true;
-        }
-
         clearBtn.classList.toggle("show", term.length > 0);
         resetLink.classList.toggle("show", term.length > 0 || rs.length > 0);
 
@@ -1096,8 +935,8 @@
 
         let html = toRender
           .map(
-            (item, i) => `
-    <div class="card" data-i="${i}">
+            (item, idx) => `
+    <div class="card" data-i="${idx}">
       <p class="desc">${escapeHtml(fmt(item.descrizione))}</p>
       <p class="rs">${escapeHtml(fmt(item.ragione_sociale))}${item.fornitore ? " · Fornitore " + escapeHtml(fmt(item.fornitore)) : ""}</p>
       <div class="chips">
@@ -1116,38 +955,6 @@
         resultsEl.innerHTML = html;
       }
 
-      // ---- scheda dettaglio ----
-      const detailModal = document.getElementById("detailModal");
-
-      function openDetail(item) {
-        document.getElementById("dDesc").textContent = fmt(item.descrizione);
-        document.getElementById("dRs").textContent =
-          fmt(item.ragione_sociale) +
-          (item.fornitore ? " · Fornitore " + fmt(item.fornitore) : "");
-        const codici = splitCodici(item.codice_articolo);
-        document.getElementById("dCod").innerHTML = codici.length
-          ? codici.map((c) => '<span class="d-cod">' + escapeHtml(c) + "</span>").join("")
-          : '<span class="d-cod">—</span>';
-        document.getElementById("dPlu").textContent = formatPlu(item.plu) || "—";
-        detailModal.hidden = false;
-        document.body.style.overflow = "hidden";
-      }
-      function closeDetail() {
-        detailModal.hidden = true;
-        document.body.style.overflow = "";
-      }
-      resultsEl.addEventListener("click", (e) => {
-        if (!SCHEDA_DETTAGLIO) return;
-        const card = e.target.closest(".card");
-        if (!card) return;
-        const item = lastRendered[Number(card.dataset.i)];
-        if (item) openDetail(item);
-      });
-      detailModal.addEventListener("click", closeDetail);
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") closeDetail();
-      });
-
       rsFilter.addEventListener("change", render);
       searchBox.addEventListener("input", render);
       clearBtn.addEventListener("click", () => {
@@ -1159,6 +966,36 @@
         searchBox.value = "";
         rsFilter.value = "";
         render();
+      });
+
+      // --- scheda prodotto: tocco sulla card la apre, tocco sulla scheda la chiude ---
+      const schedaOverlay = document.getElementById("schedaOverlay");
+      const schedaBox = document.getElementById("schedaBox");
+      function chiudiScheda() {
+        schedaOverlay.classList.remove("show");
+      }
+      function apriScheda(item) {
+        const plu = formatPlu(item.plu);
+        schedaBox.innerHTML = `
+          <p class="s-desc">${escapeHtml(fmt(item.descrizione))}</p>
+          <p class="s-rs">${escapeHtml(fmt(item.ragione_sociale))}${item.fornitore ? " · Fornitore " + escapeHtml(fmt(item.fornitore)) : ""}</p>
+          <p class="s-label">Codice articolo fornitore</p>
+          <p class="s-val s-cod">${escapeHtml(fmt(item.codice_articolo)) || "—"}</p>
+          <p class="s-label">PLU</p>
+          <p class="s-val s-plu">${plu ? escapeHtml(plu) : "—"}</p>
+          <p class="s-hint">Tocca per chiudere</p>`;
+        schedaOverlay.classList.add("show");
+      }
+      resultsEl.addEventListener("click", (e) => {
+        if (!SCHEDA_PRODOTTO) return;
+        const card = e.target.closest(".card[data-i]");
+        if (!card) return;
+        const item = lastRendered[Number(card.dataset.i)];
+        if (item) apriScheda(item);
+      });
+      schedaOverlay.addEventListener("click", chiudiScheda);
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") chiudiScheda();
       });
 
       window.appSetData = function (arr) {
@@ -1176,100 +1013,6 @@
       window.appShowMessage("Caricamento articoli…");
     </script>
 
-    <script>
-      (function () {
-        const modal = document.getElementById("installModal");
-        const installBtn = document.getElementById("installBtn");
-        const laterBtn = document.getElementById("installLater");
-        const iosSteps = document.getElementById("iosSteps");
-        const installText = document.getElementById("installText");
-        const KEY = "plu-install-dismissed";
-        const SNOOZE_MS = 2 * 24 * 60 * 60 * 1000; // richiede di nuovo dopo 2 giorni
-
-        const isStandalone =
-          window.matchMedia("(display-mode: standalone)").matches ||
-          navigator.standalone === true;
-        const isIos =
-          /iphone|ipad|ipod/i.test(navigator.userAgent) ||
-          (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-
-        let deferredPrompt = null;
-        let shown = false;
-
-        function snoozed() {
-          try {
-            return Date.now() - (Number(localStorage.getItem(KEY)) || 0) < SNOOZE_MS;
-          } catch (e) {
-            return false;
-          }
-        }
-        function snooze() {
-          try {
-            localStorage.setItem(KEY, String(Date.now()));
-          } catch (e) {}
-        }
-        function hide() {
-          modal.hidden = true;
-        }
-
-        function maybeShow() {
-          if (shown || isStandalone || snoozed()) return;
-          if (!document.body.classList.contains("auth-ok")) return; // solo dopo il login
-          if (!deferredPrompt && !isIos) return; // browser senza installazione
-          shown = true;
-          setTimeout(() => {
-            if (isIos && !deferredPrompt) {
-              installText.textContent =
-                "Per installare l'app sul tuo iPhone/iPad:";
-              iosSteps.hidden = false;
-              installBtn.hidden = true;
-              laterBtn.textContent = "Ho capito";
-            }
-            modal.hidden = false;
-          }, 1200);
-        }
-
-        window.addEventListener("beforeinstallprompt", (e) => {
-          e.preventDefault();
-          deferredPrompt = e;
-          maybeShow();
-        });
-
-        window.addEventListener("appinstalled", () => {
-          deferredPrompt = null;
-          hide();
-        });
-
-        installBtn.addEventListener("click", async () => {
-          if (!deferredPrompt) return;
-          deferredPrompt.prompt();
-          try {
-            await deferredPrompt.userChoice;
-          } catch (e) {}
-          deferredPrompt = null;
-          hide();
-        });
-
-        laterBtn.addEventListener("click", () => {
-          snooze();
-          hide();
-        });
-        modal.addEventListener("click", (e) => {
-          if (e.target === modal) {
-            snooze();
-            hide();
-          }
-        });
-
-        // mostra la modale appena l'utente ha fatto login
-        new MutationObserver(maybeShow).observe(document.body, {
-          attributes: true,
-          attributeFilter: ["class"],
-        });
-        maybeShow();
-      })();
-    </script>
-
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
       import {
@@ -1283,9 +1026,10 @@
         persistentLocalCache,
         persistentMultipleTabManager,
         collection,
-        getDocs,
-        query,
-        orderBy,
+        doc,
+        getDocsFromCache,
+        getDocsFromServer,
+        getDocFromServer,
         terminate,
         clearIndexedDbPersistence,
       } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -1303,18 +1047,49 @@
       const btn = document.getElementById("loginBtn");
       let loaded = false;
 
+      const LS_KEY = "plu_versione_dati";
+      const lsGet = () => { try { return localStorage.getItem(LS_KEY); } catch (e) { return null; } };
+      const lsSet = (v) => { try { localStorage.setItem(LS_KEY, v); } catch (e) {} };
+
+      function itemsFrom(snap) {
+        const items = [];
+        snap.docs
+          .sort((a, b) => (a.data().ordine ?? 0) - (b.data().ordine ?? 0))
+          .forEach((d) => items.push(...(d.data().items || [])));
+        return items;
+      }
+
+      // 1) mostra subito i dati in cache (istantaneo, anche offline)
+      // 2) legge 1 solo documento meta/articoli dal server: se la versione dei dati
+      //    e' uguale a quella locale non scarica nulla, altrimenti aggiorna in background
       async function loadArticoli() {
         if (loaded) return;
-        window.appShowMessage("Caricamento articoli…");
+        loaded = true;
+        let shown = false;
         try {
-          const snap = await getDocs(
-            query(collection(db, "articoli"), orderBy("ordine")),
-          );
-          const items = [];
-          snap.forEach((d) => items.push(...(d.data().items || [])));
-          loaded = true;
-          window.appSetData(items);
+          const c = await getDocsFromCache(collection(db, "articoli"));
+          if (!c.empty) {
+            window.appSetData(itemsFrom(c));
+            shown = true;
+          }
+        } catch (e) {}
+        if (!shown) window.appShowMessage("Caricamento articoli…");
+
+        let remote; // undefined = non raggiungibile / non leggibile, null = doc assente
+        try {
+          const m = await getDocFromServer(doc(db, "meta", "articoli"));
+          remote = m.exists() ? String(m.data().versione) : null;
+        } catch (e) {}
+
+        if (shown && remote && remote === lsGet()) return; // dati gia' aggiornati
+
+        try {
+          const snap = await getDocsFromServer(collection(db, "articoli"));
+          window.appSetData(itemsFrom(snap));
+          if (remote) lsSet(remote);
         } catch (e) {
+          if (shown) return; // offline: restano i dati in cache
+          loaded = false;
           window.appShowMessage(
             e.code === "permission-denied"
               ? "Accesso negato ai dati (controlla le regole Firestore)."
