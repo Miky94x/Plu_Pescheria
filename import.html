@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex" />
+<title>Import articoli</title>
+<style>
+  body { font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:#050b14; color:#e6f3f3; max-width:420px; margin:0 auto; padding:24px 20px; }
+  h1 { font-size:20px; }
+  input, button { width:100%; font-size:16px; padding:13px 14px; border-radius:12px; border:1.5px solid rgba(140,200,210,.2); background:#122a3e; color:#e6f3f3; margin-bottom:12px; box-sizing:border-box; }
+  button { background:#2fe6d0; color:#050b14; font-weight:800; border:none; cursor:pointer; }
+  button:disabled { opacity:.5; }
+  #log { font-size:13px; color:#7e97aa; white-space:pre-wrap; }
+  .hide { display:none; }
+</style>
+</head>
+<body>
+<h1>Import articoli su Firestore</h1>
+
+<div id="loginBox">
+  <input type="email" id="email" placeholder="Email" autocomplete="username" />
+  <input type="password" id="password" placeholder="Password" autocomplete="current-password" />
+  <button id="loginBtn">Accedi</button>
+</div>
+
+<div id="importBox" class="hide">
+  <p>Seleziona il file <b>articoli.json</b> e carica. Gli articoli già presenti su Firestore vengono sostituiti.</p>
+  <input type="file" id="file" accept="application/json,.json" />
+  <button id="uploadBtn">Carica su Firestore</button>
+</div>
+
+<p id="log"></p>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, collection, getDocs, doc, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { firebaseConfig } from "./firebase-config.js";
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const logEl = document.getElementById("log");
+  const log = (m) => (logEl.textContent = m);
+
+  onAuthStateChanged(auth, (u) => {
+    document.getElementById("loginBox").classList.toggle("hide", !!u);
+    document.getElementById("importBox").classList.toggle("hide", !u);
+    if (u) log("Connesso come " + u.email + "\nUID: " + u.uid);
+  });
+
+  document.getElementById("loginBtn").onclick = async () => {
+    try {
+      await signInWithEmailAndPassword(auth, document.getElementById("email").value.trim(), document.getElementById("password").value);
+    } catch (e) { log("Login fallito: " + e.code); }
+  };
+
+  document.getElementById("uploadBtn").onclick = async () => {
+    const f = document.getElementById("file").files[0];
+    if (!f) return log("Seleziona prima articoli.json");
+    const btn = document.getElementById("uploadBtn");
+    btn.disabled = true;
+    try {
+      const items = JSON.parse(await f.text());
+      if (!Array.isArray(items) || !items.length) throw new Error("File non valido");
+
+      // 1) scrive i nuovi documenti (sovrascrive p000..pN: nessun momento senza dati)
+      const SIZE = 100, CHUNK = 400;
+      const docs = [];
+      for (let i = 0; i < items.length; i += SIZE) {
+        const n = docs.length;
+        docs.push({ id: "p" + String(n).padStart(3, "0"), data: { ordine: n, items: items.slice(i, i + SIZE) } });
+      }
+      for (let i = 0; i < docs.length; i += CHUNK) {
+        log("Scrivo documenti " + Math.min(i + CHUNK, docs.length) + "/" + docs.length + "…");
+        const b = writeBatch(db);
+        docs.slice(i, i + CHUNK).forEach((d) => b.set(doc(db, "articoli", d.id), d.data));
+        await b.commit();
+      }
+
+      // 2) segnala la nuova versione ai client (leggono solo questo documento all'avvio)
+      await writeBatch(db)
+        .set(doc(db, "meta", "articoli"), { versione: Date.now(), count: items.length, documenti: docs.length })
+        .commit();
+
+      // 3) solo ora elimina i vecchi documenti in eccesso
+      log("Pulisco i documenti non più usati…");
+      const nuovi = new Set(docs.map((d) => d.id));
+      const extra = (await getDocs(collection(db, "articoli"))).docs.filter((d) => !nuovi.has(d.id));
+      for (let i = 0; i < extra.length; i += CHUNK) {
+        const b = writeBatch(db);
+        extra.slice(i, i + CHUNK).forEach((d) => b.delete(d.ref));
+        await b.commit();
+      }
+      log("Fatto: " + items.length + " articoli caricati in " + docs.length + " documenti" + (extra.length ? " (" + extra.length + " vecchi eliminati)." : "."));
+    } catch (e) {
+      log("Errore: " + (e.code || e.message));
+    } finally { btn.disabled = false; }
+  };
+</script>
+</body>
+</html>

@@ -1,4 +1,6 @@
-const CACHE_NAME = 'plu-pescheria-v3';
+// la versione arriva da index.html (sw.js?v=...): un solo posto da aggiornare
+const APP_VERSION = new URL(self.location.href).searchParams.get('v') || '0';
+const CACHE_NAME = 'plu-pescheria-v' + APP_VERSION;
 const ASSETS = [
   './',
   './index.html',

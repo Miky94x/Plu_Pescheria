@@ -212,6 +212,16 @@
         display: flex;
       }
 
+      .search-hint {
+        margin: 6px 2px 0;
+        font-size: 12px;
+        color: var(--mist-dim);
+        line-height: 1.4;
+      }
+      .search-hint b {
+        color: var(--mist);
+      }
+
       .meta-row {
         display: flex;
         align-items: center;
@@ -556,6 +566,9 @@
             ✕
           </button>
         </div>
+        <p class="search-hint">
+          Codice esatto: scrivi il numero e premi <b>spazio</b> (es. «103␣»)
+        </p>
       </div>
     </div>
 
@@ -568,14 +581,20 @@
 
     <footer>
       <br />Multinu Michael<br />Mercatò Asti Via Bra 2
-      <span class="version-tag">V.2.0.0</span>
+      <span class="version-tag" id="versionTag"></span>
     </footer>
 
     <script>
+      // UNICO punto dove cambiare versione: aggiorna anche la cache del service worker
+      const APP_VERSION = "2.1.0";
+      document.getElementById("versionTag").textContent = "V." + APP_VERSION;
+
       if ("serviceWorker" in navigator) {
+        // c'era gia' un service worker attivo? (se no, e' la prima installazione)
+        const hadController = !!navigator.serviceWorker.controller;
         window.addEventListener("load", () => {
           navigator.serviceWorker
-            .register("./sw.js")
+            .register("./sw.js?v=" + APP_VERSION)
             .then((reg) => {
               // controlla subito se su GitHub Pages c'e' una versione piu' recente
               reg.update();
@@ -589,7 +608,8 @@
           // la versione aggiornata (niente piu' cache da cancellare a mano)
           let refreshing = false;
           navigator.serviceWorker.addEventListener("controllerchange", () => {
-            if (refreshing) return;
+            // niente reload alla prima installazione (evita di interrompere il login)
+            if (!hadController || refreshing) return;
             refreshing = true;
             window.location.reload();
           });
@@ -866,9 +886,10 @@
         persistentLocalCache,
         persistentMultipleTabManager,
         collection,
-        getDocs,
-        query,
-        orderBy,
+        doc,
+        getDocsFromCache,
+        getDocsFromServer,
+        getDocFromServer,
         terminate,
         clearIndexedDbPersistence,
       } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -886,18 +907,49 @@
       const btn = document.getElementById("loginBtn");
       let loaded = false;
 
+      const LS_KEY = "plu_versione_dati";
+      const lsGet = () => { try { return localStorage.getItem(LS_KEY); } catch (e) { return null; } };
+      const lsSet = (v) => { try { localStorage.setItem(LS_KEY, v); } catch (e) {} };
+
+      function itemsFrom(snap) {
+        const items = [];
+        snap.docs
+          .sort((a, b) => (a.data().ordine ?? 0) - (b.data().ordine ?? 0))
+          .forEach((d) => items.push(...(d.data().items || [])));
+        return items;
+      }
+
+      // 1) mostra subito i dati in cache (istantaneo, anche offline)
+      // 2) legge 1 solo documento meta/articoli dal server: se la versione dei dati
+      //    e' uguale a quella locale non scarica nulla, altrimenti aggiorna in background
       async function loadArticoli() {
         if (loaded) return;
-        window.appShowMessage("Caricamento articoli…");
+        loaded = true;
+        let shown = false;
         try {
-          const snap = await getDocs(
-            query(collection(db, "articoli"), orderBy("ordine")),
-          );
-          const items = [];
-          snap.forEach((d) => items.push(...(d.data().items || [])));
-          loaded = true;
-          window.appSetData(items);
+          const c = await getDocsFromCache(collection(db, "articoli"));
+          if (!c.empty) {
+            window.appSetData(itemsFrom(c));
+            shown = true;
+          }
+        } catch (e) {}
+        if (!shown) window.appShowMessage("Caricamento articoli…");
+
+        let remote; // undefined = non raggiungibile / non leggibile, null = doc assente
+        try {
+          const m = await getDocFromServer(doc(db, "meta", "articoli"));
+          remote = m.exists() ? String(m.data().versione) : null;
+        } catch (e) {}
+
+        if (shown && remote && remote === lsGet()) return; // dati gia' aggiornati
+
+        try {
+          const snap = await getDocsFromServer(collection(db, "articoli"));
+          window.appSetData(itemsFrom(snap));
+          if (remote) lsSet(remote);
         } catch (e) {
+          if (shown) return; // offline: restano i dati in cache
+          loaded = false;
           window.appShowMessage(
             e.code === "permission-denied"
               ? "Accesso negato ai dati (controlla le regole Firestore)."
