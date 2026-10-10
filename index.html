@@ -696,6 +696,15 @@
         font-size: 12px;
         color: var(--mist-dim);
       }
+
+      .search-hint {
+        margin: 7px 2px 0;
+        font-size: 12.5px;
+        color: var(--mist);
+      }
+      .search-hint[hidden] {
+        display: none;
+      }
     </style>
   </head>
   <body class="auth-loading">
@@ -758,6 +767,7 @@
             ✕
           </button>
         </div>
+        <p class="search-hint" id="searchHint" hidden></p>
       </div>
     </div>
 
@@ -1038,6 +1048,16 @@
         const term = rawTerm.trim();
         const isNumericSearch = /^\d+$/.test(term);
         const exact = isNumericSearch && /\s$/.test(rawTerm);
+
+        const hintEl = document.getElementById("searchHint");
+        if (isNumericSearch) {
+          hintEl.hidden = false;
+          hintEl.textContent = exact
+            ? "✔ Ricerca esatta del codice"
+            : "💡 Aggiungi uno spazio dopo il numero per cercare solo il codice esatto";
+        } else {
+          hintEl.hidden = true;
+        }
 
         clearBtn.classList.toggle("show", term.length > 0);
         resetLink.classList.toggle("show", term.length > 0 || rs.length > 0);
